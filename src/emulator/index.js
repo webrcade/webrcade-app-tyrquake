@@ -3,6 +3,7 @@ import {
   Controller,
   KeyCodeToControlMapping,
   RetroAppWrapper,
+  LOG
 } from '@webrcade/app-common';
 
 class QuakeKeyCodeToControlMapping extends KeyCodeToControlMapping {
@@ -12,6 +13,8 @@ class QuakeKeyCodeToControlMapping extends KeyCodeToControlMapping {
     });
   }
 }
+
+const MAX_SAVES = 12;
 
 const AUTO = 0;
 const QUAKE = 1;
@@ -50,6 +53,7 @@ export class Emulator extends RetroAppWrapper {
 
     this.paks = {};
     this.binaryFileName = null;
+    this.dirName = null;
 
     this.maxKeys = 100;
     this.keyCount = 0;
@@ -173,9 +177,96 @@ export class Emulator extends RetroAppWrapper {
     return this.prefs;
   }
 
-  async saveState() {}
+  onSave() {
+    // Called from Emscripten to initiate save
+    this.saveState();
+  }
 
-  async loadState() {}
+  async saveState() {
+    const { dirName } = this;
+    const { FS } = window;
+
+    try {
+      const saveName = `${dirName}.zip`;
+      const pathPrefix = this.savePathPrefix;
+      const files = [];
+      for (let i = -1; i < MAX_SAVES; i++) {
+        const fileName = i === -1 ? "config.cfg" : `s${i}.sav`;
+        const path = `${pathPrefix}${fileName}`;
+        try {
+          const res = FS.analyzePath(path, true);
+          if (res.exists) {
+            const s = FS.readFile(path);
+            if (s) {
+              files.push({
+                name: fileName,
+                content: s,
+              });
+            }
+          }
+        } catch (e) {
+          LOG.error(e);
+        }
+      }
+
+      const hasChanges = await this.getSaveManager().checkFilesChanged(files);
+      if (hasChanges) {
+        await this.getSaveManager().save(
+          `${this.saveStatePrefix}${saveName}`,
+          files,
+          this.saveMessageCallback,
+        );
+      }
+    } catch (e) {
+      LOG.error('Error persisting save state: ' + e);
+    }
+  }
+
+  async loadState() {
+    const { dirName } = this;
+    const { FS } = window;
+
+    try {
+      const saveName = `${dirName}.zip`;
+
+      // Load from new save format
+      const files = await this.getSaveManager().load(
+        `${this.saveStatePrefix}${saveName}`,
+        this.loadMessageCallback,
+      );
+
+      // Cache file hashes
+      await this.getSaveManager().checkFilesChanged(files);
+
+      const pathPrefix = this.savePathPrefix;
+      FS.mkdir(pathPrefix.substring(0, pathPrefix.length - 1));
+
+      for (let i = -1; i < MAX_SAVES; i++) {
+        const fileName = i === -1 ? "config.cfg" : `s${i}.sav`;
+        const path = `${pathPrefix}${fileName}`;
+        try {
+          const res = FS.analyzePath(path, true);
+          if (!res.exists) {
+            let s = null;
+            for (let j = 0; j < files.length; j++) {
+              const f = files[j];
+              if (f.name === fileName) {
+                s = f.content;
+                break;
+              }
+            }
+            if (s) {
+              FS.writeFile(path, s);
+            }
+          }
+        } catch (e) {
+          LOG.error(e);
+        }
+      }
+    } catch (e) {
+      LOG.error('Error loading save state: ' + e);
+    }
+  }
 
   applyGameSettings() {}
 
@@ -239,6 +330,8 @@ export class Emulator extends RetroAppWrapper {
       const name = this.findPak(path);
       if (!name) throwError(path);
       this.binaryFileName = this.getMainPakFile(name);
+      this.dirName = name;
+      this.savePathPrefix = `/home/web_user/retroarch/userdata/saves/${name}/`;
     }
 
     const t = this.wadType;
