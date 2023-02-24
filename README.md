@@ -1,1 +1,1 @@
-# webrcade-app-tyrquake
+# TyrQuake
