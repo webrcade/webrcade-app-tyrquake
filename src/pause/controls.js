@@ -1,19 +1,24 @@
 import React from 'react';
 
-import { ControlsTab } from '@webrcade/app-common';
+import { ControlsTab, FieldRow, FieldSpan } from '@webrcade/app-common';
 
 export class GamepadControlsTab extends ControlsTab {
   render() {
     return (
       <>
-        {/* {this.renderControl('start', 'Start')}
-        {this.renderControl('select', 'Select')}
+        {this.renderControl('start', 'Quake Menu')}
+        {this.renderControl('select', 'Show Scores')}
         {this.renderControl('dpad', 'Move')}
-        {this.renderControl('lanalog', 'Move')}
-        {this.renderControl('a', 'Button A')}
-        {this.renderControl('b', 'Button B')}
-        {this.renderControl('x', 'Button C')}
-        {this.renderControl('y', 'Button D')} */}
+        {this.renderControl('lanalog', 'Move (Analog)')}
+        {this.renderControl('ranalog', 'Aim')}
+        {this.renderControl('x', 'Strafe Left')}
+        {this.renderControl('b', 'Strafe Right')}
+        {this.renderControl('y', 'Swim Up')}
+        {this.renderControl('a', 'Swim Down')}
+        {this.renderControl('lbump', 'Previous Weapon')}
+        {this.renderControl('rbump', 'Next Weapon')}
+        {this.renderControl('ltrig', 'Jump')}
+        {this.renderControl('rtrig', 'Shoot')}
       </>
     );
   }
@@ -23,16 +28,13 @@ export class KeyboardControlsTab extends ControlsTab {
   render() {
     return (
       <>
-        {/* {this.renderKey('Enter', 'Start')}
-        {this.renderKey('ShiftRight', 'Select')}
-        {this.renderKey('ArrowUp', 'Up')}
-        {this.renderKey('ArrowDown', 'Down')}
-        {this.renderKey('ArrowLeft', 'Left')}
-        {this.renderKey('ArrowRight', 'Right')}
-        {this.renderKey('KeyZ', 'Button A')}
-        {this.renderKey('KeyX', 'Button B')}
-        {this.renderKey('KeyC', 'Button C')}
-        {this.renderKey('KeyV', 'Button D')} */}
+        {this.renderKey('Escape', 'Quake Menu')}
+        {this.renderKey('Escape', '(Long Hold) webЯcade Pause Menu')}
+        <FieldRow>
+          <FieldSpan>
+            Refer to Quake Menu for Keyboard and Mouse mappings.
+          </FieldSpan>
+        </FieldRow>
       </>
     );
   }

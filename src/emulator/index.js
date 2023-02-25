@@ -20,6 +20,7 @@ const AUTO = 0;
 const QUAKE = 1;
 const SCOURGE = 2;
 const DISSOLUTION = 3;
+const DOPA = 4;
 const CUSTOM = 100;
 
 const QUAKE_FULL_SHAREWARE_PATH = "id1/pak0.pak";
@@ -28,6 +29,7 @@ const QUAKE_FULL_PATH = "id1/pak1.pak";
 const QUAKE_PATH = "id1/";
 const SCOURGE_PATH = "hipnotic/";
 const DISSOLUTION_PATH = "rogue/";
+const DOPA_PATH = "dopa/";
 
 export class Emulator extends RetroAppWrapper {
 
@@ -353,6 +355,9 @@ export class Emulator extends RetroAppWrapper {
           break;
         case DISSOLUTION:
           getMainFor(DISSOLUTION_PATH);
+          break;
+        case DOPA:
+          getMainFor(DOPA_PATH);
           break;
         case CUSTOM:
           const path = this.wadPath;
