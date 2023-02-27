@@ -91,6 +91,21 @@ export class Emulator extends RetroAppWrapper {
       }
     }
 
+    document.onmouseup = (e) => {
+      switch (e.button) {
+        case 0:
+          this.mouseButtons &= (~this.MOUSE_LEFT);
+          break;
+        case 1:
+          this.mouseButtons &= (~this.MOUSE_MIDDLE);
+          break;
+        case 2:
+          this.mouseButtons &= (~this.MOUSE_RIGHT);
+          break;
+        default:
+      }
+    }
+
     document.onkeydown = (e) => {
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
@@ -135,6 +150,11 @@ export class Emulator extends RetroAppWrapper {
     return true;
   }
 
+  onShowQuakeMenu(show) {
+    // alert('show menu: ' + show);
+    this.analogMode = !show;
+  }
+
   onFrame() {
     if (this.firstFrame) {
       const canvas = this.canvas;
@@ -156,7 +176,7 @@ export class Emulator extends RetroAppWrapper {
       window.Module._wrc_on_key(k[0], k[1]);
     }
 
-    this.mouseButtons = 0;
+    // this.mouseButtons = 0;
     this.mouseX = 0;
     this.mouseY = 0;
     this.keyCount = 0;
