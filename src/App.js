@@ -1,8 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import {
-  WebrcadeRetroApp
-} from '@webrcade/app-common';
+import { WebrcadeRetroApp } from '@webrcade/app-common';
 
 import { Emulator } from './emulator';
 import { EmulatorPauseScreen } from './pause';
@@ -10,7 +8,6 @@ import { EmulatorPauseScreen } from './pause';
 import './App.scss';
 
 class App extends WebrcadeRetroApp {
-
   createEmulator(app, isDebug) {
     return new Emulator(app, isDebug);
   }

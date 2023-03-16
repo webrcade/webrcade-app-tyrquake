@@ -3,7 +3,7 @@ import {
   Controller,
   KeyCodeToControlMapping,
   RetroAppWrapper,
-  LOG
+  LOG,
 } from '@webrcade/app-common';
 
 class QuakeKeyCodeToControlMapping extends KeyCodeToControlMapping {
@@ -23,16 +23,15 @@ const DISSOLUTION = 3;
 const DOPA = 4;
 const CUSTOM = 100;
 
-const QUAKE_FULL_SHAREWARE_PATH = "id1/pak0.pak";
-const QUAKE_FULL_PATH = "id1/pak1.pak";
+const QUAKE_FULL_SHAREWARE_PATH = 'id1/pak0.pak';
+const QUAKE_FULL_PATH = 'id1/pak1.pak';
 
-const QUAKE_PATH = "id1/";
-const SCOURGE_PATH = "hipnotic/";
-const DISSOLUTION_PATH = "rogue/";
-const DOPA_PATH = "dopa/";
+const QUAKE_PATH = 'id1/';
+const SCOURGE_PATH = 'hipnotic/';
+const DISSOLUTION_PATH = 'rogue/';
+const DOPA_PATH = 'dopa/';
 
 export class Emulator extends RetroAppWrapper {
-
   constructor(app, debug = false) {
     super(app, debug);
     this.analogMode = true;
@@ -40,7 +39,7 @@ export class Emulator extends RetroAppWrapper {
     this.mouseY = 0;
     this.mouseButtons = 0;
     this.firstFrame = true;
-    this.escapeDownTime = 0;
+    this.escapeDownTime = -1;
 
     this.wadType = this.getProps().wadType;
     if (!this.wadType) {
@@ -49,7 +48,7 @@ export class Emulator extends RetroAppWrapper {
 
     this.wadPath = this.getProps().wadPath;
     if (!this.wadPath) {
-      this.wadPath = "";
+      this.wadPath = '';
     }
     this.wadPath = this.wadPath.trim();
 
@@ -60,21 +59,21 @@ export class Emulator extends RetroAppWrapper {
     this.maxKeys = 100;
     this.keyCount = 0;
     this.keys = [];
-    for(let i = 0; i < this.maxKeys; i++) {
+    for (let i = 0; i < this.maxKeys; i++) {
       this.keys[i] = [0, 0];
     }
 
     document.onmousemove = (e) => {
       this.mouseX += e.movementX;
       this.mouseY += e.movementY;
-    }
+    };
 
     document.onwheel = (e) => {
       if (e.deltaY < 0) this.mouseButtons |= this.MOUSE_WHEEL_UP;
       else if (e.deltaY > 0) this.mouseButtons |= this.MOUSE_WHEEL_DOWN;
       if (e.deltaX < 0) this.mouseButtons |= this.MOUSE_HORIZ_WHEEL_UP;
       else if (e.deltaX > 0) this.mouseButtons |= this.MOUSE_HORIZ_WHEEL_DOWN;
-    }
+    };
 
     document.onmousedown = (e) => {
       switch (e.button) {
@@ -89,29 +88,29 @@ export class Emulator extends RetroAppWrapper {
           break;
         default:
       }
-    }
+    };
 
     document.onmouseup = (e) => {
       switch (e.button) {
         case 0:
-          this.mouseButtons &= (~this.MOUSE_LEFT);
+          this.mouseButtons &= ~this.MOUSE_LEFT;
           break;
         case 1:
-          this.mouseButtons &= (~this.MOUSE_MIDDLE);
+          this.mouseButtons &= ~this.MOUSE_MIDDLE;
           break;
         case 2:
-          this.mouseButtons &= (~this.MOUSE_RIGHT);
+          this.mouseButtons &= ~this.MOUSE_RIGHT;
           break;
         default:
       }
-    }
+    };
 
     document.onkeydown = (e) => {
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
         const key = this.keys[this.keyCount++];
         if (e.code === 'Escape') {
-          if (this.escapeDownTime === 0) {
+          if (this.escapeDownTime === -1) {
             this.escapeDownTime = Date.now();
           }
           return;
@@ -119,14 +118,17 @@ export class Emulator extends RetroAppWrapper {
         key[0] = code;
         key[1] = 1;
       }
-    }
+    };
 
     document.onkeyup = (e) => {
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
         let key = this.keys[this.keyCount++];
         if (e.code === 'Escape') {
-          if ((Date.now() - this.escapeDownTime) < 1000) {
+          if (
+            this.escapeDownTime !== -1 &&
+            Date.now() - this.escapeDownTime < 1000
+          ) {
             key[0] = code;
             key[1] = 0;
             key = this.keys[this.keyCount++];
@@ -137,13 +139,13 @@ export class Emulator extends RetroAppWrapper {
               this.showPauseMenu();
             }
           }
-          this.escapeDownTime = 0;
+          this.escapeDownTime = -1;
           return;
         }
         key[0] = code;
         key[1] = 0;
       }
-    }
+    };
   }
 
   getExitOnLoopError() {
@@ -159,16 +161,19 @@ export class Emulator extends RetroAppWrapper {
     if (this.firstFrame) {
       const canvas = this.canvas;
       this.firstFrame = false;
-      canvas.addEventListener("click", async () => {
-        if(!document.pointerLockElement) {
+      canvas.addEventListener('click', async () => {
+        if (!document.pointerLockElement) {
           await canvas.requestPointerLock();
         }
       });
     }
 
     if (window.Module && window.Module._wrc_update_mouse) {
-      window.Module._wrc_update_mouse(this.mouseX, this.mouseY,
-        document.pointerLockElement ?this.mouseButtons : 0);
+      window.Module._wrc_update_mouse(
+        this.mouseX,
+        this.mouseY,
+        document.pointerLockElement ? this.mouseButtons : 0,
+      );
     }
 
     for (let i = 0; i < this.keyCount; i++) {
@@ -213,7 +218,7 @@ export class Emulator extends RetroAppWrapper {
       const pathPrefix = this.savePathPrefix;
       const files = [];
       for (let i = -1; i < MAX_SAVES; i++) {
-        const fileName = i === -1 ? "config.cfg" : `s${i}.sav`;
+        const fileName = i === -1 ? 'config.cfg' : `s${i}.sav`;
         const path = `${pathPrefix}${fileName}`;
         try {
           const res = FS.analyzePath(path, true);
@@ -264,7 +269,7 @@ export class Emulator extends RetroAppWrapper {
       FS.mkdir(pathPrefix.substring(0, pathPrefix.length - 1));
 
       for (let i = -1; i < MAX_SAVES; i++) {
-        const fileName = i === -1 ? "config.cfg" : `s${i}.sav`;
+        const fileName = i === -1 ? 'config.cfg' : `s${i}.sav`;
         const path = `${pathPrefix}${fileName}`;
         try {
           const res = FS.analyzePath(path, true);
@@ -293,11 +298,11 @@ export class Emulator extends RetroAppWrapper {
   applyGameSettings() {}
 
   onArchiveFile(isDir, name, stats) {
-    const {paks} = this;
+    const { paks } = this;
     const lowerName = name.toLowerCase();
 
-    if (lowerName.endsWith(".pak")) {
-      const parts = name.split("/");
+    if (lowerName.endsWith('.pak')) {
+      const parts = name.split('/');
       if (parts.length >= 2) {
         const pak = parts[parts.length - 1];
         const path = parts[parts.length - 2];
@@ -339,14 +344,14 @@ export class Emulator extends RetroAppWrapper {
         return -1;
       }
       return 0;
-    })
+    });
     return pakFiles[0][1];
   }
 
   onArchiveFilesFinished() {
     const throwError = (path) => {
-      throw Error(`Unable to find '${path}' in archive.`)
-    }
+      throw Error(`Unable to find '${path}' in archive.`);
+    };
 
     const getMainFor = (path) => {
       const name = this.findPak(path);
@@ -354,7 +359,7 @@ export class Emulator extends RetroAppWrapper {
       this.binaryFileName = this.getMainPakFile(name);
       this.dirName = name;
       this.savePathPrefix = `/home/web_user/retroarch/userdata/saves/${name}/`;
-    }
+    };
 
     const t = this.wadType;
     if (!this.findPak(QUAKE_FULL_SHAREWARE_PATH)) {
@@ -367,42 +372,42 @@ export class Emulator extends RetroAppWrapper {
     }
 
     switch (t) {
-        case QUAKE:
-          getMainFor(QUAKE_PATH);
-          break;
-        case SCOURGE:
-          getMainFor(SCOURGE_PATH);
-          break;
-        case DISSOLUTION:
-          getMainFor(DISSOLUTION_PATH);
-          break;
-        case DOPA:
-          getMainFor(DOPA_PATH);
-          break;
-        case CUSTOM:
-          const path = this.wadPath;
-          if (path.length === 0) {
-            throw Error("A custom game path was not provided.");
-          }
-          getMainFor(path);
-          break;
-        case AUTO:
-          const { paks } = this;
-          let found = false;
-          if (Object.keys(paks).length === 2) {
-            for (let p in paks) {
-              if (p.toLowerCase() === 'id1') {
-                continue;
-              }
-              getMainFor(p);
-              found = true;
-              break;
+      case QUAKE:
+        getMainFor(QUAKE_PATH);
+        break;
+      case SCOURGE:
+        getMainFor(SCOURGE_PATH);
+        break;
+      case DISSOLUTION:
+        getMainFor(DISSOLUTION_PATH);
+        break;
+      case DOPA:
+        getMainFor(DOPA_PATH);
+        break;
+      case CUSTOM:
+        const path = this.wadPath;
+        if (path.length === 0) {
+          throw Error('A custom game path was not provided.');
+        }
+        getMainFor(path);
+        break;
+      case AUTO:
+        const { paks } = this;
+        let found = false;
+        if (Object.keys(paks).length === 2) {
+          for (let p in paks) {
+            if (p.toLowerCase() === 'id1') {
+              continue;
             }
+            getMainFor(p);
+            found = true;
+            break;
           }
-          if (!found) {
-            getMainFor(QUAKE_PATH);
-          }
-          break;
+        }
+        if (!found) {
+          getMainFor(QUAKE_PATH);
+        }
+        break;
       default:
     }
   }
@@ -422,195 +427,205 @@ export class Emulator extends RetroAppWrapper {
     const hsize = 96 + zoomLevel;
     canvas.style.setProperty('width', `${wsize}vw`, 'important');
     canvas.style.setProperty('height', `${hsize}vh`, 'important');
-    canvas.style.setProperty('max-width', `calc(${hsize}vh*1.333)`, 'important');
-    canvas.style.setProperty('max-height', `calc(${wsize}vw*0.75)`, 'important');
+    canvas.style.setProperty(
+      'max-width',
+      `calc(${hsize}vh*1.333)`,
+      'important',
+    );
+    canvas.style.setProperty(
+      'max-height',
+      `calc(${wsize}vw*0.75)`,
+      'important',
+    );
   }
 
-  getShotAspectRatio() { return 1.333; }
+  getShotAspectRatio() {
+    return 1.333;
+  }
 }
 
 const getKeyCode = (k) => {
   switch (k) {
-    case "Backspace":
+    case 'Backspace':
       return 8; //K_BACKSPACE = 8,
-    case "Tab":
+    case 'Tab':
       return 9; //K_TAB = 9,
-    case "Clear":
+    case 'Clear':
       return 12; //K_CLEAR = 12,
-    case "Enter":
+    case 'Enter':
       return 13; // K_RETURN = 13, K_ENTER = 13,
-    case "Pause":
+    case 'Pause':
       return 19; //K_PAUSE = 19
-    case "Escape":
+    case 'Escape':
       return 27; //K_ESCAPE = 27,
-    case "Space":
+    case 'Space':
       return 32; //K_SPACE = 32,
-    case "Comma":
+    case 'Comma':
       return 44; //K_COMMA = 44,
-    case "Minus":
+    case 'Minus':
       return 45; //K_MINUS = 45,
-    case "Period":
+    case 'Period':
       return 46; //K_PERIOD = 46,
-    case "Slash":
+    case 'Slash':
       return 47; //K_SLASH = 47,
-    case "Digit0":
+    case 'Digit0':
       return 48; //K_0 = 48,
-    case "Digit1":
+    case 'Digit1':
       return 49; //K_1 = 49,
-    case "Digit2":
+    case 'Digit2':
       return 50; //K_2 = 50,
-    case "Digit3":
+    case 'Digit3':
       return 51; //K_3 = 51,
-    case "Digit4":
+    case 'Digit4':
       return 52; //K_4 = 52,
-    case "Digit5":
+    case 'Digit5':
       return 53; //K_5 = 53,
-    case "Digit6":
+    case 'Digit6':
       return 54; //K_6 = 54,
-    case "Digit7":
+    case 'Digit7':
       return 55; //K_7 = 55,
-    case "Digit8":
+    case 'Digit8':
       return 56; //K_8 = 56,
-    case "Digit9":
+    case 'Digit9':
       return 57; //K_9 = 57,
-    case "Semicolon":
+    case 'Semicolon':
       return 59; //K_SEMICOLON = 59,
-    case "Equal":
+    case 'Equal':
       return 61; //K_EQUALS = 61,
-    case "BracketLeft":
+    case 'BracketLeft':
       return 91; //K_LEFTBRACKET = 91,
-    case "Backslash":
+    case 'Backslash':
       return 92; //K_BACKSLASH = 92,
-    case "BracketRight":
+    case 'BracketRight':
       return 93; //K_RIGHTBRACKET = 93,
-    case "Backquote":
+    case 'Backquote':
       return 96; //K_BACKQUOTE = 96,
-    case "KeyA":
+    case 'KeyA':
       return 97; //K_a = 97,
-    case "KeyB":
+    case 'KeyB':
       return 98; //K_b = 98,
-    case "KeyC":
+    case 'KeyC':
       return 99; //K_c = 99,
-    case "KeyD":
+    case 'KeyD':
       return 100; //K_d = 100,
-    case "KeyE":
+    case 'KeyE':
       return 101; //K_e = 101,
-    case "KeyF":
+    case 'KeyF':
       return 102; //K_f = 102,
-    case "KeyG":
+    case 'KeyG':
       return 103; //K_g = 103,
-    case "KeyH":
+    case 'KeyH':
       return 104; //K_h = 104,
-    case "KeyI":
+    case 'KeyI':
       return 105; //K_i = 105,
-    case "KeyJ":
+    case 'KeyJ':
       return 106; //K_j = 106,
-    case "KeyK":
+    case 'KeyK':
       return 107; //K_k = 107,
-    case "KeyL":
+    case 'KeyL':
       return 108; //K_l = 108,
-    case "KeyM":
+    case 'KeyM':
       return 109; //K_m = 109,
-    case "KeyN":
+    case 'KeyN':
       return 110; //K_n = 110,
-    case "KeyO":
+    case 'KeyO':
       return 111; //K_o = 111,
-    case "KeyP":
+    case 'KeyP':
       return 112; //K_p = 112,
-    case "KeyQ":
+    case 'KeyQ':
       return 113; //K_q = 113,
-    case "KeyR":
+    case 'KeyR':
       return 114; //K_r = 114,
-    case "KeyS":
+    case 'KeyS':
       return 115; //K_s = 115,
-    case "KeyT":
+    case 'KeyT':
       return 116; //K_t = 116,
-    case "KeyU":
+    case 'KeyU':
       return 117; //K_u = 117,
-    case "KeyV":
+    case 'KeyV':
       return 118; //K_v = 118,
-    case "KeyW":
+    case 'KeyW':
       return 119; //K_w = 119,
-    case "KeyX":
+    case 'KeyX':
       return 120; //K_x = 120,
-    case "KeyY":
+    case 'KeyY':
       return 121; //K_y = 121,
-    case "KeyZ":
+    case 'KeyZ':
       return 122; //K_z = 122,
-    case "Delete":
+    case 'Delete':
       return 127; //K_DEL = 127,
-    case "ArrowUp":
+    case 'ArrowUp':
       return 273; //K_UPARROW = 273,
-    case "ArrowDown":
+    case 'ArrowDown':
       return 274; //K_DOWNARROW = 274,
-    case "ArrowRight":
+    case 'ArrowRight':
       return 275; //K_RIGHTARROW = 275,
-    case "ArrowLeft":
+    case 'ArrowLeft':
       return 276; //K_LEFTARROW = 276,
-    case "Insert":
+    case 'Insert':
       return 277; //K_INS = 277,
-    case "Home":
+    case 'Home':
       return 278; //K_HOME = 278,
-    case "End":
+    case 'End':
       return 279; //K_END = 279,
-    case "PageUp":
+    case 'PageUp':
       return 280; //K_PGUP = 280,
-    case "PageDown":
+    case 'PageDown':
       return 281; //K_PGDN = 281,
-    case "F1":
+    case 'F1':
       return 282; //K_F1 = 282,
-    case "F2":
+    case 'F2':
       return 283; //K_F2 = 283,
-    case "F3":
+    case 'F3':
       return 284; //K_F3 = 284,
-    case "F4":
+    case 'F4':
       return 285; //K_F4 = 285,
-    case "F5":
+    case 'F5':
       return 286; //K_F5 = 286,
-    case "F6":
+    case 'F6':
       return 287; //K_F6 = 287,
-    case "F7":
+    case 'F7':
       return 288; //K_F7 = 288,
-    case "F8":
+    case 'F8':
       return 289; //K_F8 = 289,
-    case "F9":
+    case 'F9':
       return 290; //K_F9 = 290,
-    case "F10":
+    case 'F10':
       return 291; //K_F10 = 291,
-    case "F11":
+    case 'F11':
       return 292; //K_F11 = 292,
-    case "F12":
+    case 'F12':
       return 293; //K_F12 = 293,
-    case "F13":
+    case 'F13':
       return 294; //K_F13 = 294,
-    case "F14":
+    case 'F14':
       return 295; //K_F14 = 295,
-    case "F15":
+    case 'F15':
       return 296; //K_F15 = 296,
-    case "CapsLock":
+    case 'CapsLock':
       return 301; //K_CAPSLOCK = 301,
-    case "ScrollLock":
+    case 'ScrollLock':
       return 302; //K_SCROLLOCK = 302,
-    case "ShiftRight":
+    case 'ShiftRight':
       return 303; //K_RSHIFT = 303,
-    case "ShiftLeft":
+    case 'ShiftLeft':
       return 304; //K_LSHIFT = 304,
-    case "ControlRight":
+    case 'ControlRight':
       return 305; //K_RCTRL = 305,
-    case "ControlLeft":
+    case 'ControlLeft':
       return 306; //K_LCTRL = 306,
-    case "AltRight":
+    case 'AltRight':
       return 307; //K_RALT = 307,
-    case "AltLeft":
+    case 'AltLeft':
       return 308; //K_LALT = 308,
-    case "MetaRight":
+    case 'MetaRight':
       return 309; //K_RMETA = 309,
-    case "MetaLeft":
+    case 'MetaLeft':
       return 310; //K_LMETA = 310,
     default:
   }
   return 0;
-}
+};
 
 //K_EXCLAIM = 33,
 //K_QUOTEDBL = 34,

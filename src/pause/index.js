@@ -26,13 +26,16 @@ export class EmulatorPauseScreen extends Component {
   ModeEnum = {
     PAUSE: 'pause',
     CONTROLS: 'controls',
-    QUAKE_SETTINGS: 'quake-settings'
+    QUAKE_SETTINGS: 'quake-settings',
   };
 
-  ADDITIONAL_BUTTON_REFS = [React.createRef(), React.createRef(), React.createRef()];
+  ADDITIONAL_BUTTON_REFS = [
+    React.createRef(),
+    React.createRef(),
+    React.createRef(),
+  ];
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   render() {
     const { ADDITIONAL_BUTTON_REFS, ModeEnum } = this;
@@ -57,7 +60,7 @@ export class EmulatorPauseScreen extends Component {
         onClick={() => {
           this.setState({ mode: ModeEnum.CONTROLS });
         }}
-      />
+      />,
     ];
 
     additionalButtons.push(
@@ -71,7 +74,7 @@ export class EmulatorPauseScreen extends Component {
         onClick={() => {
           this.setState({ mode: ModeEnum.QUAKE_SETTINGS });
         }}
-      />
+      />,
     );
 
     const gamepad = <GamepadControlsTab />;
@@ -111,10 +114,7 @@ export class EmulatorPauseScreen extends Component {
         ) : null}
 
         {mode === ModeEnum.QUAKE_SETTINGS ? (
-          <QuakeSettingsEditor
-            emulator={emulator}
-            onClose={closeCallback}
-          />
+          <QuakeSettingsEditor emulator={emulator} onClose={closeCallback} />
         ) : null}
       </>
     );
