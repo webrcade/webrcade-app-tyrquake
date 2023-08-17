@@ -29,7 +29,7 @@ export class KeyboardControlsTab extends ControlsTab {
     return (
       <>
         {this.renderKey('Escape', 'Quake Menu')}
-        {this.renderKey('Escape', '(Long Hold) webЯcade Pause Menu')}
+        {/* {this.renderKey('Escape', '(Long Hold) webЯcade Pause Menu')} */}
         <FieldRow>
           <FieldSpan>
             Refer to Quake Menu for Keyboard and Mouse mappings.

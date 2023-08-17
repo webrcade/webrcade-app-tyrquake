@@ -109,12 +109,12 @@ export class Emulator extends RetroAppWrapper {
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
         const key = this.keys[this.keyCount++];
-        if (e.code === 'Escape') {
-          if (this.escapeDownTime === -1) {
-            this.escapeDownTime = Date.now();
-          }
-          return;
-        }
+        // if (e.code === 'Escape') {
+        //   if (this.escapeDownTime === -1) {
+        //     this.escapeDownTime = Date.now();
+        //   }
+        //   return;
+        // }
         key[0] = code;
         key[1] = 1;
       }
@@ -124,24 +124,24 @@ export class Emulator extends RetroAppWrapper {
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
         let key = this.keys[this.keyCount++];
-        if (e.code === 'Escape') {
-          if (
-            this.escapeDownTime !== -1 &&
-            Date.now() - this.escapeDownTime < 1000
-          ) {
-            key[0] = code;
-            key[1] = 0;
-            key = this.keys[this.keyCount++];
-            key[0] = code;
-            key[1] = 1;
-          } else {
-            if (this.pause(true)) {
-              this.showPauseMenu();
-            }
-          }
-          this.escapeDownTime = -1;
-          return;
-        }
+        // if (e.code === 'Escape') {
+        //   if (
+        //     this.escapeDownTime !== -1 &&
+        //     Date.now() - this.escapeDownTime < 1000
+        //   ) {
+        //     key[0] = code;
+        //     key[1] = 0;
+        //     key = this.keys[this.keyCount++];
+        //     key[0] = code;
+        //     key[1] = 1;
+        //   } else {
+        //     if (this.pause(true)) {
+        //       this.showPauseMenu();
+        //     }
+        //   }
+        //   this.escapeDownTime = -1;
+        //   return;
+        // }
         key[0] = code;
         key[1] = 0;
       }
