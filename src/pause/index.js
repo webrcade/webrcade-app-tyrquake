@@ -2,9 +2,9 @@ import React from 'react';
 import { Component } from 'react';
 
 import { GamepadControlsTab, KeyboardControlsTab } from './controls';
+import { QuakeSettingsEditor } from './settings';
 
 import {
-  AppSettingsEditor,
   CustomPauseScreen,
   EditorScreen,
   GamepadWhiteImage,
@@ -114,7 +114,7 @@ export class EmulatorPauseScreen extends Component {
         ) : null}
 
         {mode === ModeEnum.QUAKE_SETTINGS ? (
-          <AppSettingsEditor emulator={emulator} onClose={closeCallback} />
+          <QuakeSettingsEditor emulator={emulator} onClose={closeCallback} />
         ) : null}
       </>
     );
