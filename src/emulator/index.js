@@ -443,12 +443,40 @@ export class Emulator extends RetroAppWrapper {
   //   return 1.333;
   // }
 
+  isOneShotCheats() {
+    return true;
+  }
+
   isForceAspectRatio() {
     return false;
   }
 
   getDefaultAspectRatio() {
     return 1.333;
+  }
+
+  getRaConfigContents() {
+    // onWriteAdditionalFiles() always writes to game.cht, but RetroArch derives
+    // the expected cheat filename from the content basename (e.g. pak1.pak → pak1.cht).
+    // binaryFileName is only available after archive extraction, so we write the
+    // correctly-named cheat file here instead, just before callMain is invoked.
+    if (this.cheatBytes && this.binaryFileName) {
+      const { FS } = window;
+      try {
+        const cheatsDir = '/home/web_user/retroarch/userdata/cheats';
+        try { FS.mkdir(cheatsDir); } catch (e) {}
+        const basename = this.binaryFileName.split('/').pop(); // e.g. "pak1.pak"
+        const nameNoExt = basename.includes('.')
+          ? basename.substring(0, basename.lastIndexOf('.'))
+          : basename; // e.g. "pak1"
+        const chtPath = `${cheatsDir}/${nameNoExt}.cht`;
+        FS.writeFile(chtPath, this.cheatBytes);
+        LOG.info(`[Cheats]: Wrote game-specific cheat file to ${chtPath}`);
+      } catch (e) {
+        LOG.error(`[Cheats]: Error writing game-specific cheat file: ${e}`);
+      }
+    }
+    return super.getRaConfigContents();
   }
 
   resizeScreen(canvas) {

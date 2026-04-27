@@ -5,6 +5,8 @@ import { GamepadControlsTab, KeyboardControlsTab } from './controls';
 import { QuakeSettingsEditor } from './settings';
 
 import {
+  BoltWhiteImage,
+  CheatsSettingsEditor,
   CustomPauseScreen,
   EditorScreen,
   GamepadWhiteImage,
@@ -27,9 +29,11 @@ export class EmulatorPauseScreen extends Component {
     PAUSE: 'pause',
     CONTROLS: 'controls',
     QUAKE_SETTINGS: 'quake-settings',
+    CHEATS: 'cheats',
   };
 
   ADDITIONAL_BUTTON_REFS = [
+    React.createRef(),
     React.createRef(),
     React.createRef(),
     React.createRef(),
@@ -77,6 +81,22 @@ export class EmulatorPauseScreen extends Component {
       />,
     );
 
+    if (emulator.getCheatsService().getList().length > 0) {
+      additionalButtons.push(
+        <PauseScreenButton
+          imgSrc={BoltWhiteImage}
+          buttonRef={ADDITIONAL_BUTTON_REFS[2]}
+          label="Cheats"
+          onHandlePad={(focusGrid, e) =>
+            focusGrid.moveFocus(e.type, ADDITIONAL_BUTTON_REFS[2])
+          }
+          onClick={() => {
+            this.setState({ mode: ModeEnum.CHEATS });
+          }}
+        />
+      );
+    }
+
     const gamepad = <GamepadControlsTab />;
     const keyboard = <KeyboardControlsTab />;
     const gamepadLabel = Resources.getText(TEXT_IDS.GAMEPAD_CONTROLS);
@@ -115,6 +135,12 @@ export class EmulatorPauseScreen extends Component {
 
         {mode === ModeEnum.QUAKE_SETTINGS ? (
           <QuakeSettingsEditor emulator={emulator} onClose={closeCallback} />
+        ) : null}
+        {mode === ModeEnum.CHEATS ? (
+          <CheatsSettingsEditor
+            emulator={emulator}
+            onClose={closeCallback}
+          />
         ) : null}
       </>
     );
