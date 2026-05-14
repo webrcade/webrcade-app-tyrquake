@@ -200,6 +200,10 @@ export class Emulator extends RetroAppWrapper {
     return 'js/tyrquake_libretro.js';
   }
 
+  getHashFileExtension() {
+    return 'pak';
+  }
+
   getPrefs() {
     return this.prefs;
   }
