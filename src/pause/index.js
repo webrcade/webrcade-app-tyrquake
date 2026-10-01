@@ -161,7 +161,7 @@ export class EmulatorPauseScreen extends Component {
         ) : null}
 
         {mode === ModeEnum.QUAKE_SETTINGS ? (
-          <QuakeSettingsEditor emulator={emulator} onClose={closeCallback} />
+          <QuakeSettingsEditor emulator={emulator} onClose={closeCallback} showOnScreenControls={true} />
         ) : null}
         {mode === ModeEnum.CHEATS ? (
           <CheatsSettingsEditor
