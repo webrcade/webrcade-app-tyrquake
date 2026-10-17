@@ -1,8 +1,8 @@
 import {
+  BasicRetroAppWrapper,
   Controllers,
   Controller,
   KeyCodeToControlMapping,
-  RetroAppWrapper,
   LOG,
 } from '@webrcade/app-common';
 
@@ -31,7 +31,7 @@ const SCOURGE_PATH = 'hipnotic/';
 const DISSOLUTION_PATH = 'rogue/';
 const DOPA_PATH = 'dopa/';
 
-export class Emulator extends RetroAppWrapper {
+export class Emulator extends BasicRetroAppWrapper {
   constructor(app, debug = false) {
     super(app, debug);
     this.analogMode = true;
@@ -106,6 +106,14 @@ export class Emulator extends RetroAppWrapper {
     };
 
     document.onkeydown = (e) => {
+      // WRC - feeds the shared on-screen-controls auto-detection
+      // (BasicRetroAppWrapper's checkOnScreenControls()) the same way
+      // every other app's onkeydown does. Added here rather than a
+      // separate handler in onFrame() since document.onkeydown can only
+      // ever hold one function - a second assignment there would have
+      // silently replaced this raw keyboard forwarding entirely.
+      if (!this.paused) this.onKeyboardEvent(e);
+
       const code = getKeyCode(e.code);
       if (code !== 0 && this.keyCount < this.maxKeys) {
         const key = this.keys[this.keyCount++];
@@ -157,15 +165,38 @@ export class Emulator extends RetroAppWrapper {
     this.analogMode = !show;
   }
 
+  // Base class default pauses on any tap anywhere on screen -- redundant
+  // (and disruptive) now that there's a dedicated Pause button in the
+  // touch overlay, and actively harmful here since a tap is also how the
+  // canvas requests pointer lock (see onFrame() below). Same override
+  // every other TouchOverlay app uses for the same reason.
+  createTouchListener() {}
+
   onFrame() {
     if (this.firstFrame) {
       const canvas = this.canvas;
       this.firstFrame = false;
+
+      this.app.showCanvas();
+
       canvas.addEventListener('click', async () => {
         if (!document.pointerLockElement) {
           await canvas.requestPointerLock();
         }
       });
+
+      setTimeout(() => {
+        const onTouch = () => { this.onTouchEvent() };
+        window.addEventListener("touchstart", onTouch);
+        window.addEventListener("touchend", onTouch);
+        window.addEventListener("touchcancel", onTouch);
+        window.addEventListener("touchmove", onTouch);
+
+        const onMouse = () => { this.onMouseEvent() };
+        window.addEventListener("mousedown", onMouse);
+        window.addEventListener("mouseup", onMouse);
+        window.addEventListener("mousemove", onMouse);
+      }, 0);
     }
 
     if (window.Module && window.Module._wrc_update_mouse) {
